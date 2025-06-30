@@ -8,6 +8,7 @@ const { sendNotification } = require("../utils/notification"); // ✅ Import the
 const multer = require("multer");
 const path = require("path");
 const mongoose = require("mongoose");
+const { storage } = require("./cloudinary.config");
 
 const router = express.Router();
 const transporter = nodemailer.createTransport({
@@ -19,15 +20,15 @@ const transporter = nodemailer.createTransport({
 });
 
 // Multer setup for profile photo uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../uploads"));
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + "-profile" + ext);
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, path.join(__dirname, "../uploads"));
+//   },
+//   filename: function (req, file, cb) {
+//     const ext = path.extname(file.originalname);
+//     cb(null, Date.now() + "-profile" + ext);
+//   },
+// });
 const upload = multer({ storage });
 
 // ✅ Register Route (User Registration)
@@ -298,7 +299,7 @@ router.post("/profile-photo", upload.single("photo"), async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
     // Save the file path as the profile photo URL
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = req.file.path;
     user.profilePhoto = fileUrl;
     // Save password change notification
     user.notifications.push({
